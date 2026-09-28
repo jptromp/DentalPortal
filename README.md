@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Dental Design Portal
 
-## Getting Started
+Case-management portal for a dental design service: clients (laboratories and practices) submit cases and download finished designs; the design team manages the workload in a separate admin area. See [the specification](Dental_Design_Portal_Development_Specification.md).
 
-First, run the development server:
+**Stack:** Next.js 16 · Neon Postgres + Drizzle ORM · Better Auth · Cloudflare R2 · Vercel
+
+## Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+cp .env.example .env.local   # then fill in the values
+pnpm db:migrate              # apply migrations to the database in DATABASE_URL_UNPOOLED
+pnpm db:seed                 # fictional demo data (see below)
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Environment variables are documented in [.env.example](.env.example).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | Purpose |
+|---|---|
+| `pnpm dev` | Local development server |
+| `pnpm build` / `pnpm start` | Production build and server |
+| `pnpm lint` | ESLint |
+| `pnpm db:generate` | Create a migration after editing `src/db/schema/` |
+| `pnpm db:migrate` | Apply pending migrations |
+| `pnpm db:studio` | Browse the database |
+| `pnpm db:seed` | Seed demo data into an empty database |
+| `pnpm db:seed --reset` | **Wipe all data** and reseed (demo databases only) |
 
-## Learn More
+## Demo mode
 
-To learn more about Next.js, take a look at the following resources:
+With `DEMO_MODE=true`:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Emails are stored in the `email_outbox` table instead of being sent, and shown at `/demo-inbox`.
+- Sign-in pages list the demo accounts. All use the password `DemoPortal2026!`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Demo mode exposes sign-in links and passwords publicly. Turn it off before real clients use the system.
 
-## Deploy on Vercel
+To send real email, set `RESEND_API_KEY` and `EMAIL_FROM` (requires a verified domain in Resend).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `src/db/schema/` — database tables; `drizzle/` — generated migrations
+- `src/lib/auth.ts` — Better Auth configuration
+- `src/lib/session.ts` — `requireClient` / `requireStaff` / `requireAdmin`; every protected page and action must use these
+- `src/lib/queries/` — data access, always scoped by organisation for clients
+- `src/lib/case-status.ts` — internal statuses, client-facing labels, and progress stages
+- `src/app/portal/` — client portal; `src/app/admin/` — design team area
+- `scripts/seed.ts` — demo data

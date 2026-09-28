@@ -36,6 +36,28 @@ export const notifications = pgTable(
   (t) => [index().on(t.userId, t.readAt, t.createdAt)],
 );
 
+// Every outgoing email is recorded here first. With no provider configured
+// (demo mode) emails stay here and are shown in the demo inbox.
+export const emailOutbox = pgTable(
+  "email_outbox",
+  {
+    id: id(),
+    toAddress: text().notNull(),
+    subject: text().notNull(),
+    html: text().notNull(),
+    text: text().notNull(),
+    template: text().notNull(),
+    status: emailDeliveryStatus().notNull().default("pending"),
+    providerMessageId: text(),
+    error: text(),
+    sentAt: timestamp({ withTimezone: true }),
+    // Same key twice means the same email; the second insert is skipped.
+    dedupeKey: text().unique(),
+    createdAt: createdAt(),
+  },
+  (t) => [index().on(t.createdAt)],
+);
+
 // Append-only: a trigger in the migrations rejects UPDATE and DELETE.
 export const auditEvents = pgTable(
   "audit_events",
