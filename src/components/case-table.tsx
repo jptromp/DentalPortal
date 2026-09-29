@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { CaseListRow } from "@/lib/queries/cases";
 import { finishedStatuses, statusInfo } from "@/lib/case-status";
 import { dueState, formatDate, formatDateTime } from "@/lib/format";
@@ -26,6 +27,7 @@ export function CaseTable({
   compact?: boolean;
 }) {
   const staff = audience === "staff";
+  const href = (row: CaseListRow) => `/${staff ? "admin" : "portal"}/cases/${row.id}`;
   return (
     <>
       {/* Cards on small screens */}
@@ -36,9 +38,12 @@ export function CaseTable({
             <li key={row.id} className="space-y-2 px-5 py-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="font-mono text-sm font-medium text-slate-900">
+                  <Link
+                    href={href(row)}
+                    className="font-mono text-sm font-medium text-teal-800 hover:underline"
+                  >
                     {row.caseNumber}
-                  </p>
+                  </Link>
                   <p className="text-sm text-slate-500">
                     {staff ? row.organisationName : row.serviceName}
                   </p>
@@ -95,9 +100,12 @@ export function CaseTable({
               return (
                 <tr key={row.id} className="align-top hover:bg-slate-50/60">
                   <td className="px-5 py-3.5">
-                    <p className="whitespace-nowrap font-mono text-[13px] font-medium text-slate-900">
+                    <Link
+                      href={href(row)}
+                      className="whitespace-nowrap font-mono text-[13px] font-medium text-teal-800 hover:underline"
+                    >
                       {row.caseNumber}
-                    </p>
+                    </Link>
                     <p className="mt-0.5 whitespace-nowrap text-xs text-slate-500">
                       {row.clientCaseNumber ? `Ref. ${row.clientCaseNumber}` : "No client ref."}
                     </p>

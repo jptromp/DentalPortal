@@ -40,6 +40,15 @@ Demo mode exposes sign-in links and passwords publicly. Turn it off before real 
 
 To send real email, set `RESEND_API_KEY` and `EMAIL_FROM` (requires a verified domain in Resend).
 
+## File uploads
+
+Scans and other case files go straight from the browser to the private R2 bucket as multipart uploads (16 MiB parts, three in parallel), so large files never pass through the web server. The flow is `POST /api/uploads` → `POST /api/uploads/:id/parts` (presigned part URLs) → `POST /api/uploads/:id/complete`, which checks the size and the file's leading bytes against its extension. Downloads go through `/api/files/:id`, which checks access, logs the download, and redirects to a 5-minute link.
+
+- Accepted types and size limits are in `src/lib/files/rules.ts` and can be overridden with an `uploads` row in `app_settings`.
+- The R2 bucket's CORS policy must allow `PUT` from every origin that uploads. Vercel preview URLs are not allowed yet, so uploads only work locally and on the production URL.
+- **No malware scanner is connected.** Files stay `scanStatus = "pending"`; in demo mode they are downloadable and marked "Not scanned (demo)". With demo mode off, pending files cannot be downloaded or released until a scanner sets them to `clean`.
+- Recommended: an R2 lifecycle rule that aborts incomplete multipart uploads after 7 days.
+
 ## Structure
 
 - `src/db/schema/` — database tables; `drizzle/` — generated migrations

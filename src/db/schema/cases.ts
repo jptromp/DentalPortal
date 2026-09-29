@@ -170,6 +170,8 @@ export const caseFiles = pgTable(
     sizeBytes: bigint({ mode: "number" }).notNull(),
     checksumSha256: text(),
     uploadStatus: uploadStatus().notNull().default("pending"),
+    // R2 multipart upload in progress; cleared once the upload completes.
+    multipartUploadId: text(),
     scanStatus: scanStatus().notNull().default("pending"),
     scannedAt: timestamp({ withTimezone: true }),
     // Versions of the same logical file share a group; the first version's

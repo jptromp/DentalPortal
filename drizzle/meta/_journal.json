@@ -22,6 +22,13 @@
       "when": 1790609840642,
       "tag": "0002_auth_and_outbox",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790666885504,
+      "tag": "0003_case_file_multipart",
+      "breakpoints": true
     }
   ]
 }

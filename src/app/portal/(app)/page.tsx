@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CaseTable } from "@/components/case-table";
+import { NewCaseButton } from "@/components/new-case-button";
 import {
   Card,
   CardHeader,
@@ -8,6 +9,7 @@ import {
   PageHeader,
   StatCard,
 } from "@/components/ui";
+import { canSubmitCases } from "@/lib/case-access";
 import { clientActionStatuses } from "@/lib/case-status";
 import { formatDateTime } from "@/lib/format";
 import {
@@ -35,6 +37,7 @@ export default async function PortalDashboard() {
       <PageHeader
         title={`Welcome, ${context.organisation.name}`}
         description="Here is where your cases stand today."
+        action={canSubmitCases(context) ? <NewCaseButton /> : undefined}
       />
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">

@@ -115,3 +115,78 @@ export function newRegistrationTemplate(organisationName: string, url: string) {
     action: { label: "Review clients", url },
   });
 }
+
+export type CaseEmailDetails = {
+  caseNumber: string;
+  clientCaseNumber: string;
+  caseType: string;
+  submittedOn: string;
+  requestedDueDate: string;
+  rush: boolean;
+};
+
+function caseLines(details: CaseEmailDetails) {
+  return [
+    `Case number: ${details.caseNumber}`,
+    `Your reference: ${details.clientCaseNumber}`,
+    `Case type: ${details.caseType}${details.rush ? " (rush requested)" : ""}`,
+    `Submitted: ${details.submittedOn}`,
+    `Requested due date: ${details.requestedDueDate}`,
+  ];
+}
+
+export function caseSubmittedTemplate(name: string, details: CaseEmailDetails, url: string) {
+  return build(`Case ${details.caseNumber} received`, {
+    heading: "We have received your case",
+    paragraphs: [
+      `Hi ${name},`,
+      "Thank you. Your case and files have been received and our team will review them shortly.",
+      ...caseLines(details),
+    ],
+    action: { label: "View case", url },
+    footnote:
+      "The requested due date is confirmed once the case has been reviewed. For security, case files are never attached to emails.",
+  });
+}
+
+export function newCaseStaffTemplate(organisationName: string, details: CaseEmailDetails, url: string) {
+  return build(`New case ${details.caseNumber}${details.rush ? " (rush)" : ""} from ${organisationName}`, {
+    heading: "New case submitted",
+    paragraphs: [`${organisationName} submitted a new case.`, ...caseLines(details)],
+    action: { label: "Open case", url },
+  });
+}
+
+export function informationRequestedTemplate(name: string, caseNumber: string, url: string) {
+  return build(`Information needed for case ${caseNumber}`, {
+    heading: "We need a little more information",
+    paragraphs: [
+      `Hi ${name},`,
+      `Our design team has a question about case ${caseNumber}. Please read their message and reply or upload the requested files in the portal.`,
+    ],
+    action: { label: "View case", url },
+  });
+}
+
+export function filesReleasedTemplate(
+  name: string,
+  caseNumber: string,
+  kind: "preview" | "final",
+  url: string,
+) {
+  return build(
+    kind === "preview"
+      ? `Design preview ready for case ${caseNumber}`
+      : `Files ready to download for case ${caseNumber}`,
+    {
+      heading: kind === "preview" ? "Your design preview is ready" : "Your files are ready",
+      paragraphs: [
+        `Hi ${name},`,
+        kind === "preview"
+          ? `A design preview for case ${caseNumber} is ready for your review.`
+          : `New files for case ${caseNumber} are ready to download.`,
+      ],
+      action: { label: "View case", url },
+    },
+  );
+}

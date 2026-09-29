@@ -15,11 +15,13 @@ export function SubmitButton({
   children,
   pendingLabel,
   variant = "primary",
+  size = "md",
   className,
 }: {
   children: ReactNode;
   pendingLabel?: string;
   variant?: Parameters<typeof buttonClass>[0];
+  size?: Parameters<typeof buttonClass>[1];
   className?: string;
 }) {
   const { pending } = useFormStatus();
@@ -28,14 +30,14 @@ export function SubmitButton({
       type="submit"
       disabled={pending}
       aria-disabled={pending}
-      className={cn(buttonClass(variant), className)}
+      className={cn(buttonClass(variant, size), className)}
     >
       {pending ? (pendingLabel ?? "Please wait…") : children}
     </button>
   );
 }
 
-const inputClass =
+export const inputClass =
   "block w-full rounded-lg bg-white px-3 py-2 text-[15px] text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-600 aria-[invalid=true]:ring-rose-400";
 
 export function Field({
@@ -82,10 +84,56 @@ export function Field({
   );
 }
 
+export function TextAreaField({
+  label,
+  name,
+  error,
+  hint,
+  optional,
+  className,
+  ...props
+}: ComponentProps<"textarea"> & {
+  label: string;
+  name: string;
+  error?: string[];
+  hint?: string;
+  optional?: boolean;
+}) {
+  const id = `field-${name}`;
+  return (
+    <div className={className}>
+      <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-slate-800">
+        {label}
+        {optional && <span className="ml-1 font-normal text-slate-400">(optional)</span>}
+      </label>
+      <textarea
+        id={id}
+        name={name}
+        rows={4}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? `${id}-error` : hint ? `${id}-hint` : undefined}
+        className={inputClass}
+        {...props}
+      />
+      {hint && !error && (
+        <p id={`${id}-hint`} className="mt-1.5 text-xs text-slate-500">
+          {hint}
+        </p>
+      )}
+      {error && (
+        <p id={`${id}-error`} className="mt-1.5 text-xs text-rose-700">
+          {error[0]}
+        </p>
+      )}
+    </div>
+  );
+}
+
 export function SelectField({
   label,
   name,
   error,
+  optional,
   options,
   className,
   ...props
@@ -93,6 +141,7 @@ export function SelectField({
   label: string;
   name: string;
   error?: string[];
+  optional?: boolean;
   options: { value: string; label: string }[];
 }) {
   const id = `field-${name}`;
@@ -100,6 +149,7 @@ export function SelectField({
     <div className={className}>
       <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-slate-800">
         {label}
+        {optional && <span className="ml-1 font-normal text-slate-400">(optional)</span>}
       </label>
       <select
         id={id}
